@@ -260,3 +260,27 @@ class FaceRecognitionResult(BaseModel):
     driver_id: Optional[int] = None
     confidence: Optional[float] = None
     message: str
+
+# Ticket Management Schemas
+class TicketCreate(BaseModel):
+    bus_id: int
+    bus_number: str
+    route_name: str
+    source_stop: str
+    destination_stop: str
+
+class TicketResponse(BaseModel):
+    id: str
+    bus_id: int
+    bus_number: str
+    route_name: str
+    source_stop: str
+    destination_stop: str
+    qr_code: str
+    one_time_code: str
+    expires_at: str
+    status: str
+    created_at: str
+
+    class Config:
+        from_attributes = True

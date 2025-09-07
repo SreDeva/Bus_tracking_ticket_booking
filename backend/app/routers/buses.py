@@ -396,24 +396,37 @@ async def emergency_alert(
 ):
     """Send emergency alert from driver"""
     try:
+        # Import SOS model
+        from .sos import SOSAlert
+        
+        # Create SOS alert in database
+        sos_alert = SOSAlert(
+            bus_id=emergency_data.get('bus_id'),
+            bus_number=emergency_data.get('bus_number', 'Unknown'),
+            driver_id=emergency_data.get('driver_id', current_user.id),
+            driver_name=current_user.full_name,
+            latitude=emergency_data.get('latitude'),
+            longitude=emergency_data.get('longitude'),
+            emergency_type=emergency_data.get('emergency_type', 'other'),
+            message=emergency_data.get('message', 'Emergency alert from driver'),
+            priority='high'
+        )
+        
+        db.add(sos_alert)
+        db.commit()
+        db.refresh(sos_alert)
+        
         # Log the emergency alert
         import logging
-        import time
-        
-        logging.warning(f"EMERGENCY ALERT: {emergency_data}")
-        
-        # In a real system, you would:
-        # 1. Save to emergency_alerts table
-        # 2. Send push notifications to admin
-        # 3. Send SMS/email alerts
-        # 4. Update bus status to emergency
+        logging.warning(f"EMERGENCY ALERT CREATED: ID={sos_alert.id}, BUS={sos_alert.bus_id}, TYPE={sos_alert.emergency_type}")
         
         return {
             "status": "success",
             "message": "Emergency alert sent successfully",
-            "alert_id": f"ALERT_{emergency_data.get('bus_id')}_{int(time.time())}",
-            "timestamp": time.time()
+            "alert_id": sos_alert.id,
+            "timestamp": sos_alert.created_at.timestamp()
         }
         
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=f"Emergency alert failed: {str(e)}")

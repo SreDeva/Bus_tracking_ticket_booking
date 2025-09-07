@@ -6,7 +6,14 @@ import RouteMap from './RouteMap';
 import * as Location from 'expo-location';
 
 // API Configuration - should match AuthContext
-const API_BASE_URL = 'http://10.26.181.214:8000';
+const API_CONFIGS = {
+  ANDROID_EMULATOR: 'http://10.123.168.214:8000',
+  IOS_SIMULATOR: 'http://localhost:8000', 
+  PHYSICAL_DEVICE: 'http://10.123.168.214:8000', // Replace with your IP
+};
+
+// Set the active configuration here - should match AuthContext
+const API_BASE_URL = API_CONFIGS.PHYSICAL_DEVICE;
 
 interface BusInfo {
   bus_id: number;
@@ -275,11 +282,55 @@ const DriverDashboard: React.FC = () => {
       return;
     }
 
+    // Record driver assignment on blockchain
+    try {
+      const blockchainData = {
+        busId: currentBusInfo.bus_number,
+        source: currentBusInfo.route.origin,
+        destination: currentBusInfo.route.destination,
+        driverId: user?.id?.toString() || 'unknown',
+        timestamp: Math.floor(Date.now() / 1000) // Unix timestamp
+      };
+
+      console.log('Recording assignment on blockchain:', blockchainData);
+
+      const response = await fetch('http://10.26.181.214:8001/assignments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(blockchainData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Blockchain recording failed:', errorData);
+        Alert.alert(
+          'Blockchain Warning',
+          'Trip started but blockchain recording failed. Trip will continue normally.',
+          [{ text: 'Continue' }]
+        );
+      } else {
+        const result = await response.json();
+        console.log('Assignment recorded on blockchain:', result);
+        Alert.alert(
+          'Trip Started',
+          'Assignment recorded on blockchain. GPS tracking is now active. You will receive proximity alerts when approaching bus stops.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (blockchainError) {
+      console.error('Blockchain error:', blockchainError);
+      Alert.alert(
+        'Blockchain Warning',
+        'Trip started but blockchain recording failed. Trip will continue normally.',
+        [{ text: 'Continue' }]
+      );
+    }
+
     setIsTripActive(true);
     setIsTrackingGPS(true);
     startGPSTracking();
-    
-    Alert.alert('Trip Started', 'GPS tracking is now active. You will receive proximity alerts when approaching bus stops.');
   };
 
   const startGPSTracking = async () => {

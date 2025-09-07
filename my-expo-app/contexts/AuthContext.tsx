@@ -4,14 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // For Android emulator, use 10.0.2.2 instead of localhost
 // For iOS simulator, use localhost
 // For physical device, use your computer's IP address
-// const API_BASE_URL = 'http://10.26.181.214:8000'; // Android emulator
+// const API_BASE_URL = 'http://10.123.168.214:8000'; // Android emulator
 // const API_BASE_URL = 'http://localhost:8000'; // iOS simulator
-// const API_BASE_URL = 'http://10.26.181.214:8000'; // Physical device (replace with your IP)
+// const API_BASE_URL = 'http://10.123.168.214:8000'; // Physical device (replace with your IP)
 // API Configuration - Choose one based on your setup
 const API_CONFIGS = {
-  ANDROID_EMULATOR: 'http://10.26.181.214:8000',
+  ANDROID_EMULATOR: 'http://10.123.168.214:8000',
   IOS_SIMULATOR: 'http://localhost:8000', 
-  PHYSICAL_DEVICE: 'http://10.26.181.214:8000', // Replace with your IP
+  PHYSICAL_DEVICE: 'http://10.123.168.214:8000', // Replace with your IP
 };
 
 // Set the active configuration here

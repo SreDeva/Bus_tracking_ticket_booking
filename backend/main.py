@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from app.database import engine, Base
-from app.routers import auth, users, buses
+from app.routers import auth, users, buses, sos, tickets
 
 # Load environment variables
 load_dotenv()
@@ -32,6 +32,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(buses.router)
+app.include_router(sos.router)
+app.include_router(tickets.router, prefix="/tickets", tags=["tickets"])
 
 security = HTTPBearer()
 

@@ -4,6 +4,8 @@ import DriverManagement from './DriverManagement';
 import UserManagement from './UserManagement';
 import BusManagement from './BusManagement';
 import RouteManagement from './RouteManagement';
+import SOSManagement from './SOSManagement';
+import BlockchainTracking from './BlockchainTracking';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -14,6 +16,8 @@ const Dashboard = () => {
     { id: 'routes', name: 'Route Management', component: RouteManagement },
     { id: 'drivers', name: 'Driver Management', component: DriverManagement },
     { id: 'users', name: 'User Management', component: UserManagement },
+    { id: 'sos', name: 'SOS Alerts', component: SOSManagement },
+    { id: 'blockchain', name: 'Blockchain Tracking', component: BlockchainTracking },
   ];
 
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component;

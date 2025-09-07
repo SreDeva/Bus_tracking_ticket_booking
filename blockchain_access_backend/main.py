@@ -4,6 +4,7 @@ import json
 from typing import List, Optional
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from web3 import Web3
 from web3.exceptions import ContractLogicError
 from dotenv import load_dotenv
@@ -52,6 +53,15 @@ if ACCOUNT_ADDRESS:
     ACCOUNT_ADDRESS_CHECKSUM = Web3.to_checksum_address(ACCOUNT_ADDRESS)
 
 app = FastAPI(title="DriverAssignmentTracker API (fixed)")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your frontend URLs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Pydantic models
 class AssignmentIn(BaseModel):
@@ -217,5 +227,19 @@ def get_assignment_events(from_block: Optional[int] = None, to_block: Optional[i
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    blockchain_status = "connected" if w3.is_connected() else "disconnected"
+    contract_status = "loaded" if contract else "not_loaded"
+    
+    return {
+        "status": "ok",
+        "blockchain": blockchain_status,
+        "contract": contract_status,
+        "rpc_url": RPC_URL,
+        "message": "Blockchain API running"
+    }
+
 # Run:
-# uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# uvicorn main:app --reload --host 0.0.0.0 --port 8001

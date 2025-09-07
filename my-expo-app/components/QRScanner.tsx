@@ -4,7 +4,15 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
 
 // API Configuration - should match AuthContext
-const API_BASE_URL = 'http://10.26.181.214:8000';
+// For consistency with AuthContext, we'll use the same IP configuration
+const API_CONFIGS = {
+  ANDROID_EMULATOR: 'http://10.123.168.214:8000',
+  IOS_SIMULATOR: 'http://localhost:8000', 
+  PHYSICAL_DEVICE: 'http://10.123.168.214:8000', // Replace with your IP
+};
+
+// Set the active configuration here - should match AuthContext
+const API_BASE_URL = API_CONFIGS.PHYSICAL_DEVICE;
 
 interface QRScannerProps {
   onScanSuccess: (busInfo: any) => void;
