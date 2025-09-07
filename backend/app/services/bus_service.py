@@ -381,15 +381,7 @@ class RouteService:
         except Exception as e:
             logger.error(f"Error getting driver active route: {str(e)}")
             raise
-    
-    # Time parsing method removed as we simplified route management
-    # def _parse_time(self, time_str: str) -> time:
-    #     """Parse time string in HH:MM format"""
-    #     try:
-    #         hour, minute = map(int, time_str.split(':'))
-    #         return time(hour, minute)
-    #     except ValueError:
-    #         raise ValueError(f"Invalid time format: {time_str}. Expected HH:MM")
+
 
 # Create service instances
 bus_service = BusService()

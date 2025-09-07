@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
 
 // For Android emulator, use 10.0.2.2 instead of localhost
-const API_BASE_URL = 'http://10.123.168.214:8000'; // Android emulator
+const API_BASE_URL = 'http://10.26.181.214:8000'; // Android emulator
 
 interface PassengerSignupProps {
   onBack: () => void;

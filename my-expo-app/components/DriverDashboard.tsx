@@ -7,13 +7,21 @@ import * as Location from 'expo-location';
 
 // API Configuration - should match AuthContext
 const API_CONFIGS = {
-  ANDROID_EMULATOR: 'http://10.123.168.214:8000',
+  ANDROID_EMULATOR: 'http://10.26.181.214:8000',
   IOS_SIMULATOR: 'http://localhost:8000', 
-  PHYSICAL_DEVICE: 'http://10.123.168.214:8000', // Replace with your IP
+  PHYSICAL_DEVICE: 'http://10.26.181.214:8000', // Replace with your IP
+};
+
+// Blockchain API Configuration
+const BLOCKCHAIN_API_CONFIGS = {
+  ANDROID_EMULATOR: 'http://10.26.181.214:8001',
+  IOS_SIMULATOR: 'http://localhost:8001', 
+  PHYSICAL_DEVICE: 'http://10.26.181.214:8001', // Replace with your IP
 };
 
 // Set the active configuration here - should match AuthContext
 const API_BASE_URL = API_CONFIGS.PHYSICAL_DEVICE;
+const BLOCKCHAIN_API_BASE_URL = BLOCKCHAIN_API_CONFIGS.PHYSICAL_DEVICE;
 
 interface BusInfo {
   bus_id: number;
@@ -229,7 +237,7 @@ const DriverDashboard: React.FC = () => {
       }
       
       // Fetch complete route information for map display
-      const response = await fetch(`http://10.26.181.214:8000/buses/routes/${route_id}/map-data`, {
+      const response = await fetch(`${API_BASE_URL}/buses/routes/${route_id}/map-data`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -294,7 +302,7 @@ const DriverDashboard: React.FC = () => {
 
       console.log('Recording assignment on blockchain:', blockchainData);
 
-      const response = await fetch('http://10.26.181.214:8001/assignments', {
+      const response = await fetch(`${BLOCKCHAIN_API_BASE_URL}/assignments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -513,7 +521,7 @@ const DriverDashboard: React.FC = () => {
     setIsEmergency(true);
     
     try {
-      const response = await fetch('http://10.26.181.214:8000/buses/emergency-alert', {
+      const response = await fetch(`${API_BASE_URL}/buses/emergency-alert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

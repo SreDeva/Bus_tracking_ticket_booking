@@ -9,6 +9,7 @@ from typing import List, Optional
 from ..database import get_db
 from ..dependencies import get_current_user
 from ..schemas import TicketCreate, TicketResponse, User
+from ..models.user import Bus, Route, RouteStop  # Import Bus model
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -62,30 +63,33 @@ async def search_buses(
 ):
     """Search for available buses between two stops"""
     try:
-        # In a real implementation, you would query the database for buses
-        # that serve a route containing both stops
+        # Get source and destination stop information
+        source_stop = db.query(RouteStop).filter(RouteStop.id == search_request.source_stop_id).first()
+        destination_stop = db.query(RouteStop).filter(RouteStop.id == search_request.destination_stop_id).first()
         
-        # Mock response for now
-        available_buses = [
-            AvailableBus(
-                id=1,
-                bus_number="BUS001",
-                route_name="Downtown Express",
-                current_latitude=12.9716,
-                current_longitude=77.5946,
-                estimated_arrival="5 minutes"
-            ),
-            AvailableBus(
-                id=2,
-                bus_number="BUS002",
-                route_name="City Loop",
-                current_latitude=12.9716,
-                current_longitude=77.5946,
-                estimated_arrival="12 minutes"
+        if not source_stop or not destination_stop:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Source or destination stop not found"
             )
-        ]
+        
+        # Get all buses from database
+        buses = db.query(Bus).limit(3).all()  # Get first 3 buses for demo
+        
+        available_buses = []
+        for bus in buses:
+            available_buses.append(AvailableBus(
+                id=bus.id,
+                bus_number=bus.bus_number,  # Use real bus number
+                route_name=f"{source_stop.stop_name} to {destination_stop.stop_name}",
+                current_latitude=source_stop.latitude + (0.01 * bus.id),  # Mock nearby location
+                current_longitude=source_stop.longitude + (0.01 * bus.id),
+                estimated_arrival=f"{5 + (bus.id * 3)} minutes"  # Mock ETA
+            ))
         
         return available_buses
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -110,11 +114,22 @@ async def book_ticket(
         # Set expiration time (1 hour from now)
         expires_at = datetime.now() + timedelta(hours=1)
         
-        # Mock data - in production, fetch from database
-        bus_number = f"BUS{ticket_data.bus_id:03d}"
-        route_name = "Downtown Express"  # Fetch from DB
-        source_stop = "Main Station"     # Fetch from DB using source_stop_id
-        destination_stop = "City Center" # Fetch from DB using destination_stop_id
+        # Get bus information from database
+        bus_info = db.query(Bus).filter(Bus.id == ticket_data.bus_id).first()
+        if not bus_info:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Bus with ID {ticket_data.bus_id} not found"
+            )
+        
+        # Get route stops information if available
+        source_stop_info = db.query(RouteStop).filter(RouteStop.id == ticket_data.source_stop_id).first()
+        destination_stop_info = db.query(RouteStop).filter(RouteStop.id == ticket_data.destination_stop_id).first()
+        
+        bus_number = bus_info.bus_number
+        route_name = f"{source_stop_info.stop_name if source_stop_info else 'Unknown'} to {destination_stop_info.stop_name if destination_stop_info else 'Unknown'}"
+        source_stop = source_stop_info.stop_name if source_stop_info else "Unknown Stop"
+        destination_stop = destination_stop_info.stop_name if destination_stop_info else "Unknown Stop"
         
         # Create ticket object
         ticket = TicketResponse(

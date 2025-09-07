@@ -6,9 +6,9 @@ import * as Location from 'expo-location';
 // API Configuration - should match AuthContext
 // For consistency with AuthContext, we'll use the same IP configuration
 const API_CONFIGS = {
-  ANDROID_EMULATOR: 'http://10.123.168.214:8000',
+  ANDROID_EMULATOR: 'http://10.26.181.214:8000',
   IOS_SIMULATOR: 'http://localhost:8000', 
-  PHYSICAL_DEVICE: 'http://10.123.168.214:8000', // Replace with your IP
+  PHYSICAL_DEVICE: 'http://10.26.181.214:8000', // Replace with your IP
 };
 
 // Set the active configuration here - should match AuthContext

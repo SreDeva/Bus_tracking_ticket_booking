@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from app.database import engine, Base
-from app.routers import auth, users, buses, sos, tickets
+from app.routers import auth, users, buses, tickets, sos, passenger_new
 
 # Load environment variables
 load_dotenv()
@@ -34,6 +34,7 @@ app.include_router(users.router)
 app.include_router(buses.router)
 app.include_router(sos.router)
 app.include_router(tickets.router, prefix="/tickets", tags=["tickets"])
+app.include_router(passenger_new.router)
 
 security = HTTPBearer()
 
@@ -56,7 +57,7 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "bus-tracking-api"}
+    return {"status": "healthy", "service": "bus-tracking-api", "timestamp": "2025-09-07 13:10:00"}
 
 if __name__ == "__main__":
     import uvicorn
