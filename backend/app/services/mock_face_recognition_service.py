@@ -244,5 +244,63 @@ class MockFaceRecognitionService:
                 "recommendations": ["Error processing image. Please try again."]
             }
 
+    def store_driver_face_encodings(self, db: Session, driver_id: int, images: List[str]) -> bool:
+        """
+        Store multiple face encodings for a driver from base64 encoded images
+        """
+        try:
+            if not images:
+                logger.error("No images provided for face encoding storage")
+                return False
+            
+            # Get the driver
+            driver = db.query(Driver).filter(Driver.id == driver_id).first()
+            if not driver:
+                logger.error(f"Driver with id {driver_id} not found")
+                return False
+            
+            all_encodings = []
+            
+            # Process each image
+            for i, base64_image in enumerate(images):
+                try:
+                    # Remove data URL prefix if present
+                    if base64_image.startswith('data:image/'):
+                        base64_image = base64_image.split(',')[1]
+                    
+                    # Decode base64 image
+                    image_data = base64.b64decode(base64_image)
+                    
+                    # Extract face encodings from this image
+                    encodings = self.extract_multiple_encodings(image_data, max_faces=3)
+                    if encodings:
+                        all_encodings.extend(encodings)
+                        logger.info(f"Extracted {len(encodings)} face encodings from image {i+1}")
+                    else:
+                        logger.warning(f"No faces detected in image {i+1}")
+                        
+                except Exception as e:
+                    logger.error(f"Error processing image {i+1}: {str(e)}")
+                    continue
+            
+            if not all_encodings:
+                logger.error("No valid face encodings extracted from any image")
+                return False
+            
+            # Encode and store the face data
+            encoded_face_data = self.encode_face_data(all_encodings)
+            driver.face_encodings = encoded_face_data
+            
+            # Commit to database
+            db.commit()
+            
+            logger.info(f"Successfully stored {len(all_encodings)} face encodings for driver {driver_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error storing face encodings for driver {driver_id}: {str(e)}")
+            db.rollback()
+            return False
+
 # Create a global instance
 face_service = MockFaceRecognitionService()
